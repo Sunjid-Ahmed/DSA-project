@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Maximum lengths for various fields
+#define MAX_NAME 100
+#define MAX_DEPT 15
+#define MAX_ID 15
+#define MAX_MAIL 30
+
+// Structure to represent a student
+struct Student {
+    char name[MAX_NAME];
+    char department[MAX_DEPT];
+    int studentID;
+    char email[MAX_MAIL];
+};
+
+// Structure to represent a seat
+struct Seat {
+    struct Student student;
+    int roomNumber;
+    struct Seat* next;
+};
+
+// Function to create a new seat node
+struct Seat* createSeat(char name[], char department[], int studentID, char email[], int roomNumber) {
+    struct Seat* newSeat = (struct Seat*)malloc(sizeof(struct Seat));
+    strcpy(newSeat->student.name, name);
+    strcpy(newSeat->student.department, department);
+    newSeat->student.studentID = studentID;
+    strcpy(newSeat->student.email, email);
+    newSeat->roomNumber = roomNumber;
+    newSeat->next = NULL;
+    return newSeat;
+}
+
+// Function to book a seat at the end of the list
+void bookSeat(struct Seat** head, char name[], char department[], int studentID, char email[], int roomNumber) {
+    struct Seat* newSeat = createSeat(name, department, studentID, email, roomNumber);
+    if (*head == NULL) {
+        *head = newSeat;
+    } else {
+        struct Seat* temp = *head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newSeat;
+    }
+}
+
+// Function to cancel a seat with given studentID
+void cancelSeat(struct Seat** head, int studentID) {
+    struct Seat *temp = *head, *prev = NULL;
+
+    if (temp != NULL && temp->student.studentID == studentID) {
+        *head = temp->next;
+        free(temp);
+        return;
+    }
+
+    while (temp != NULL && temp->student.studentID != studentID) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (temp == NULL)
+        return;
+
+    prev->next = temp->next;
+    free(temp);
+}
+
+// Function to edit a seat with given studentID
+void editSeat(struct Seat* head, int studentID, char newName[], char newDepartment[], int newStudentID, char newEmail[], int newRoomNumber) {
+    struct Seat* temp = head;
+    while (temp != NULL) {
+        if (temp->student.studentID == studentID) {
+            strcpy(temp->student.name, newName);
+            strcpy(temp->student.department, newDepartment);
+            temp->student.studentID = newStudentID;
+            strcpy(temp->student.email, newEmail);
+            temp->roomNumber = newRoomNumber;
+            return;
+        }
+        temp = temp->next;
+    }
+}
+
+// Function to search for a seat with given studentID
+int searchSeat(struct Seat* head, int studentID) {
+    struct Seat* temp = head;
+    while (temp != NULL) {
+        if (temp->student.studentID == studentID)
+            return 1; // Found
+        temp = temp->next;
+    }
+    return 0; // Not found
+}
+
+// Function to display the list of seats
+void displaySeats(struct Seat* head) {
+    struct Seat* temp = head;
+    printf("Seats:\n");
+    while (temp != NULL) {
+        printf("Name: %s, Department: %s, Student ID: %d, Email: %s, Room Number: %d\n",
+               temp->student.name, temp->student.department, temp->student.studentID, temp->student.email, temp->roomNumber);
+        temp = temp->next;
+    }
+}
+
+// Function to clear the screen
+void clear_screen() {
+    system("cls");
+}
+
+int main() {
+    struct Seat* head = NULL;
+    int choice, studentID, roomNumber, newStudentID;
+    char name[MAX_NAME], department[MAX_DEPT], email[MAX_MAIL];
+    char newName[MAX_NAME], newDepartment[MAX_DEPT], newEmail[MAX_MAIL];
+    int newRoomNumber;
+//system("cls");
+    while (1) {
+		            	printf("\nYunuf Khan Scholor Garden\n ");
+        printf("\nStudent Seat Management System\n");
+        printf("1. Book Seat\n");
+        printf("2. Cancel Seat\n");
+        printf("3. Edit Seat\n");
+        printf("4. Search Seat\n");
+        printf("5. Display All Seats\n");
+        printf("6. Clear Screen\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter name: ");
+                scanf("%s", name);
+                printf("Enter department: ");
+                scanf("%s", &department);
+                printf("Enter student ID: ");
+                scanf("%d", &studentID);
+                printf("\nEnter email: ");
+                scanf("%s", &email);
+                printf("Enter room number: ");
+                scanf("%d", &roomNumber);
+                printf("\n----------------------------\n");
+                printf("\n----------------------------\n");
+                bookSeat(&head, name, department, studentID, email, roomNumber);
+                break;
+            case 2:
+                printf("Enter student ID to cancel: ");
+                scanf("%d", &studentID);
+                cancelSeat(&head, studentID);
+                break;
+            case 3:
+                printf("Enter student ID to edit: ");
+                scanf("%d", &studentID);
+                printf("Enter new name: ");
+                scanf("%s", newName);
+                printf("Enter new department: ");
+                scanf("%s", newDepartment);
+                printf("Enter new student ID: ");
+                scanf("%d", &newStudentID);
+                printf("Enter new email\n: ");
+                scanf("%s", newEmail);
+                printf("Enter new room number: ");
+                scanf("%d", &newRoomNumber);
+                editSeat(head, studentID, newName, newDepartment, newStudentID, newEmail, newRoomNumber);
+                break;
+            case 4:
+                printf("Enter student ID to search: ");
+                scanf("%d", &studentID);
+                if (searchSeat(head, studentID)) {
+                    printf("Seat with student ID %d is booked.\n", studentID);
+                } else {
+                    printf("Seat with student ID %d is not found.\n", studentID);
+                }
+                break;
+            case 5:
+                displaySeats(head);
+                break;
+            case 6:
+                clear_screen();
+                break;
+            case 7:
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+
+    return 0;
+}
